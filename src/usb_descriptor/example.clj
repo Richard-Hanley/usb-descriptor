@@ -20,3 +20,11 @@
         :iSerialNumber 0
         :bNumConfigurations 1})
 
+(def example-config
+  #::usb{:wTotalLength 125
+         :bNumInterfaces 3
+         :bConfigurationValue 0
+         :iConfiguration 0
+         :bmAttributes 0xe0
+         :bMaxPower 100})
+
