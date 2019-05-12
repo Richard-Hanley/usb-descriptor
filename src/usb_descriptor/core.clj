@@ -94,14 +94,18 @@
            (s/def ::wMaxPacketSize ::e/uint16)
            (s/def ::bInterval ::e/uint8)])
 
+(def core-usb-types #{1 2 3 4 5})
 
+(s/def ::class (e/specify ::standard-descriptor
+                          (s/spec #(not (contains? core-usb-types (::bDescriptorType %))))))
 
+(s/defop dependent-in [field-vec f]
+  (s/conformer #(assoc-in % field-vec
+                          (f %))))
 
-
-
-
-
-
-
-
-
+;;TODO Figure out how to stop decoding endpoints
+;;Make a spec that will force the number of endpoints in the interface config
+(s/def ::interface-coll (e/cat :fields [:interface ::interface
+                                        :classes (e/* ::class :while (fn [bin] 
+                                                                       (not (contains? core-usb-types (second bin)))))
+                                        :endpoints (e/* ::endpoint :while (comp #{5} second))]))
