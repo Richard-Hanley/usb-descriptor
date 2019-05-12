@@ -1,6 +1,7 @@
 (ns usb-descriptor.example
     (:require [clojure.test :refer :all]
               [usb-descriptor.core :as usb]
+              [usb-descriptor.hid :as hid]
               [clojure.spec-alpha2 :as s]
               [encode-binary.core :as e]))
 
@@ -18,10 +19,11 @@
         :iManufacturer 1
         :iProduct 2
         :iSerialNumber 0
-        :bNumConfigurations 1})
+        :bNumConfigurations 4})
 
 (def example-config
-  #::usb{:wTotalLength 125
+  #::usb{:bDescriptorType ::usb/config
+         :wTotalLength 125
          :bNumInterfaces 3
          :bConfigurationValue 0
          :iConfiguration 0
@@ -50,3 +52,11 @@
          :bmAttribute 0x12
          :wMaxPacketSize 1024
          :bInterval 1})
+
+(def example-hid
+  #::hid{::usb/bDescriptorType ::hid/hid
+         :bcdHID 0x101
+         :bCountryCode 0
+         :bNumDescriptors 0
+         :descriptors [#::hid{:bDescriptorType 0x22 :wDescriptorLength 145}]})
+

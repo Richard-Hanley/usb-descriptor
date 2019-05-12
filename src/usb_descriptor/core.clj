@@ -99,13 +99,30 @@
 (s/def ::class (e/specify ::standard-descriptor
                           (s/spec #(not (contains? core-usb-types (::bDescriptorType %))))))
 
-(s/defop dependent-in [field-vec f]
-  (s/conformer #(assoc-in % field-vec
-                          (f %))))
 
-;;TODO Figure out how to stop decoding endpoints
-;;Make a spec that will force the number of endpoints in the interface config
-(s/def ::interface-coll (e/cat :fields [:interface ::interface
-                                        :classes (e/* ::class :while (fn [bin] 
-                                                                       (not (contains? core-usb-types (second bin)))))
-                                        :endpoints (e/* ::endpoint :while (comp #{5} second))]))
+(s/def ::force-endpoint
+  (s/conformer #(assoc-in % [:interface ::bNumEndpoints]
+                          (count (:endpoints %)))))
+
+(s/def ::interface-coll (e/specify (e/cat :fields [:interface ::interface
+                                                   :classes (e/* ::class :while (fn [bin] 
+                                                                                  (not (contains? core-usb-types (second bin)))))
+                                                   :endpoints (e/* ::endpoint :while (comp #{5} second))])
+                                   ::force-endpoint))
+
+(s/def ::force-interface
+  (s/conformer #(assoc-in % [:config ::bNumInterfaces]
+                          (count (:interfaces %)))))
+
+(s/def ::config-coll (e/specify (e/cat :fields [:config ::config
+                                                :interfaces (e/* ::interface-coll :while (comp #{4} second))])
+                                ::force-interface))
+
+(s/def ::force-config
+  (s/conformer #(assoc-in % [:device ::bNumConfigurations]
+                          (count (:configs %)))))
+
+(s/def ::device-coll (e/specify (e/cat :fields [:device ::device
+                                                :configs (e/* ::config-coll :while (comp #{2} second))])
+                                ::force-config))
+
